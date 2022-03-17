@@ -17,6 +17,7 @@ class DeGiro:
     __PRODUCT_SEARCH_URL = 'https://trader.degiro.nl/product_search/secure/v5/products/lookup'
     __PRODUCT_INFO_URL = 'https://trader.degiro.nl/product_search/secure/v5/products/info'
     __TRANSACTIONS_URL = 'https://trader.degiro.nl/reporting/secure/v4/transactions'
+    __ACTIVITIES_URL = 'https://trader.degiro.nl/reporting/secure/v6/accountoverview'
     __ORDERS_URL = 'https://trader.degiro.nl/reporting/secure/v4/order-history'
 
     __PLACE_ORDER_URL = 'https://trader.degiro.nl/trading/secure/v5/checkOrder'
@@ -94,7 +95,7 @@ class DeGiro:
         else:
             raise Exception(f'{error_message} Response: {response.text}')
 
-    def search_products(self, search_text, limit=1):
+    def search_products(self, search_text, limit=6):
         product_search_payload = {
             'searchText': search_text,
             'limit': limit,
@@ -126,6 +127,16 @@ class DeGiro:
         }
         return self.__request(DeGiro.__TRANSACTIONS_URL, None, transactions_payload,
                               error_message='Could not get transactions.')['data']
+
+    def activities(self, from_date, to_date):
+        activities_payload = {
+            'fromDate': from_date.strftime('%d/%m/%Y'),
+            'toDate': to_date.strftime('%d/%m/%Y'),
+            'intAccount': self.client_info.account_id,
+            'sessionId': self.session_id
+        }
+        return self.__request(DeGiro.__ACTIVITIES_URL, None, activities_payload,
+                              error_message='Could not get activities.')['data']
 
     def orders(self, from_date, to_date, not_executed=None):
         orders_payload = {
