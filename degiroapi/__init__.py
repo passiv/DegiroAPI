@@ -260,6 +260,20 @@ class DeGiro:
         return self.__request(DeGiro.__PRICE_DATA_URL, None, price_payload,
                              error_message='Could not get real time price')['series']
 
+    def check_order(self, data):
+        check_order_params = {
+            'intAccount': self.client_info.account_id,
+            'sessionId': self.session_id,
+        }
+        check_order_payload = data
+
+        check_order_response = self.__request(DeGiro.__PLACE_ORDER_URL + ';jsessionid=' + self.session_id, None,
+                                                    check_order_payload, check_order_params,
+                                                    request_type=DeGiro.__POST_REQUEST,
+                                                    error_message='Could not place order')
+
+        return check_order_response
+
     def buyorder(self, orderType, productId, timeType, size, limit=None, stop_loss=None):
         place_buy_order_params = {
             'intAccount': self.client_info.account_id,
@@ -288,7 +302,7 @@ class DeGiro:
 
         self.confirmation_id = place_check_order_response['data']['confirmationId']
 
-        self.__request(DeGiro.__ORDER_URL + self.confirmation_id + ';jsessionid=' + self.session_id, None,
+        return self.__request(DeGiro.__ORDER_URL + self.confirmation_id + ';jsessionid=' + self.session_id, None,
                        place_buy_order_payload, place_buy_order_params,
                        request_type=DeGiro.__POST_REQUEST,
                        error_message='Could not confirm order')
@@ -321,7 +335,7 @@ class DeGiro:
 
         self.confirmation_id = place_check_order_response['data']['confirmationId']
 
-        self.__request(DeGiro.__ORDER_URL + self.confirmation_id + ';jsessionid=' + self.session_id, None,
+        return self.__request(DeGiro.__ORDER_URL + self.confirmation_id + ';jsessionid=' + self.session_id, None,
                        place_sell_order_payload, place_sell_order_params,
                        request_type=DeGiro.__POST_REQUEST,
                        error_message='Could not confirm order')
